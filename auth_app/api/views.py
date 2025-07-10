@@ -44,7 +44,10 @@ class LoginView(APIView):
         if user is not None:
             return Response({'message': 'Login erfolgreich'}, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Ungültige Anmeldedaten'}, status=status.HTTP_401_UNAUTHORIZED)
+            if not User.objects.filter(email=email).exists():
+                return Response({'error': 'E-Mail ist nicht registriert'}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                return Response({'error': 'Passwort ist falsch'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LogoutView(APIView):
