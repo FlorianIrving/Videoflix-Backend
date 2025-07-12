@@ -2,10 +2,10 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import login, logout
-from .serializers import RegisterSerializer, LoginSerializer
+from django.contrib.auth import logout
+from .serializers import RegisterSerializer
 from rest_framework.permissions import AllowAny
-from .utils import send_activation_email, generate_token_for_user
+from .utils import send_activation_email
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
@@ -42,12 +42,12 @@ class LoginView(APIView):
         user = authenticate(request, email=email, password=password)
 
         if user is not None:
-            return Response({'message': 'Login erfolgreich'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Login successfully'}, status=status.HTTP_200_OK)
         else:
             if not User.objects.filter(email=email).exists():
-                return Response({'error': 'E-Mail ist nicht registriert'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'error': 'E-Mail is not registered'}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({'error': 'Passwort ist falsch'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'error': 'Password is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LogoutView(APIView):
@@ -65,12 +65,12 @@ class ActivateView(APIView):
             if default_token_generator.check_token(user, token):
                 user.is_active = True
                 user.save()
-                return Response({"message": "Account erfolgreich aktiviert."}, status=status.HTTP_200_OK)
+                return Response({"message": "Account successfully activated."}, status=status.HTTP_200_OK)
             else:
-                return Response({"error": "Ungültiger oder abgelaufener Token."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return Response({"error": "Ungültige Aktivierungsdaten."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid activation link."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestPasswordResetView(APIView):
@@ -83,12 +83,12 @@ class RequestPasswordResetView(APIView):
             token = token_generator.make_token(user)
             reset_url = f"http://dein-frontend/reset/{uidb64}/{token}/"
             send_mail(
-                subject="Passwort zurücksetzen",
-                message=f"Hier ist dein Link: {reset_url}",
+                subject="Password Reset Request",
+                message=f"Here is your password reset link: {reset_url}",
                 from_email="noreply@example.com",
                 recipient_list=[email],
             )
-        return Response({"message": "Wenn ein Konto existiert, wurde eine E-Mail gesendet."}, status=status.HTTP_200_OK)
+        return Response({"message": "If an account exists, an email has been sent."}, status=status.HTTP_200_OK)
 
 
 class PasswordResetConfirmView(APIView):
@@ -104,6 +104,6 @@ class PasswordResetConfirmView(APIView):
         if user and token_generator.check_token(user, token):
             user.set_password(password)
             user.save()
-            return Response({"message": "Passwort erfolgreich zurückgesetzt"}, status=status.HTTP_200_OK)
+            return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "Ungültiger Link"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
