@@ -8,7 +8,6 @@ from django.conf import settings
 # import jwt
 # from datetime import datetime, timedelta
 
-
 def send_activation_email(user, request):
     """
     Generiert Aktivierungslink & verschickt Aktivierungs-E-Mail.
@@ -38,17 +37,3 @@ def send_activation_email(user, request):
         [user.email],
         fail_silently=False,
     )
-
-
-# def generate_token_for_user(user):
-#     """
-#     OPTIONAL: JWT oder ein Custom Token generieren.
-#     """
-#     payload = {
-#         'user_id': user.id,
-#         'email': user.email,
-#         'exp': datetime.utcnow() + timedelta(days=1),
-#         'iat': datetime.utcnow(),
-#     }
-#     token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-#     return token

@@ -12,6 +12,8 @@ from django.contrib.auth.tokens import default_token_generator, PasswordResetTok
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from django.conf import settings
 
 from django.contrib.auth import get_user_model
 
@@ -40,20 +42,68 @@ class LoginView(APIView):
         password = request.data.get('password')
 
         user = authenticate(request, email=email, password=password)
-
         if user is not None:
-            return Response({'message': 'Login successfully'}, status=status.HTTP_200_OK)
-        else:
-            if not User.objects.filter(email=email).exists():
-                return Response({'error': 'E-Mail is not registered'}, status=status.HTTP_401_UNAUTHORIZED)
-            else:
-                return Response({'error': 'Password is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+
+            response = Response(
+                {"message": "Login successful."},
+                status=status.HTTP_200_OK
+            )
+
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                httponly=True,
+                samesite="Lax",
+                secure=False,
+                path="/",
+            )
+
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                samesite="Lax",
+                secure=False,
+                path="/",
+            )
+
+            return response
+
+        return Response(
+            {"detail": "E-Mail oder Passwort falsch."},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
 
 class LogoutView(APIView):
     def post(self, request):
-        logout(request)
-        return Response({"message": "Logged out!"})
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if refresh_token is None:
+            return Response(
+                {"detail": "Refresh token not found."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except TokenError:
+            return Response(
+                {"detail": "Token invalid or already blacklisted."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        response = Response(
+            {"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."},
+            status=status.HTTP_200_OK
+        )
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        return response
 
 
 class ActivateView(APIView):
@@ -81,7 +131,7 @@ class RequestPasswordResetView(APIView):
             token_generator = PasswordResetTokenGenerator()
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
-            reset_url = f"http://dein-frontend/reset/{uidb64}/{token}/"
+            reset_url = f"http://127.0.0.1:8000/password_confirm/{uidb64}/{token}/"
             send_mail(
                 subject="Password Reset Request",
                 message=f"Here is your password reset link: {reset_url}",

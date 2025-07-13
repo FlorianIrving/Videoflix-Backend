@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    "rest_framework_simplejwt.token_blacklist",
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -98,22 +99,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv("DB_NAME"),
-#         "USER": os.getenv("DB_USER"),
-#         "PASSWORD": os.getenv("DB_PASSWORD"),
-#         "HOST": os.getenv("DB_HOST"),
-#         "PORT": os.getenv("DB_PORT", 5432),
-#         "OPTIONS": {
-#             "sslmode": "require"
-#         }
-#     }
-# }
-
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -201,8 +186,28 @@ AUTH_USER_MODEL = 'auth_app.CustomUser'
 # ModelBackend
 AUTHENTICATION_BACKENDS = [
     'auth_app.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Simple JWT settings
+SIMPLE_JWT = {
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
+    "AUTH_COOKIE": "access_token",
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    "AUTH_COOKIE_SECURE": False,
+    "AUTH_COOKIE_PATH": "/",
+    "AUTH_COOKIE_SAMESITE": "Lax",
+}
+
+# CSRF and CORS settings
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:4200', 'http://127.0.0.1:4200', 'http://localhost:5500', 'http://127.0.0.1:5500'
 ]
@@ -221,4 +226,5 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",
 ]
 
+# Site ID for Django Sites framework
 SITE_ID = 1
