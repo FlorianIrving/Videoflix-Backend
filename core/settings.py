@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
+from corsheaders.defaults import default_headers
+
 
 import os
 from dotenv import load_dotenv
@@ -40,7 +42,7 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -52,8 +54,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
     'django_rq',
+    'core',
     'auth_app',
     'video_app',
 ]
@@ -67,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -195,3 +202,23 @@ AUTH_USER_MODEL = 'auth_app.CustomUser'
 AUTHENTICATION_BACKENDS = [
     'auth_app.backends.EmailBackend',
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:4200', 'http://127.0.0.1:4200', 'http://localhost:5500', 'http://127.0.0.1:5500'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200',
+    'http://127.0.0.1:4200',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "content-type",
+    "authorization",
+]
+
+SITE_ID = 1

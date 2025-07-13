@@ -8,10 +8,10 @@ CustomUser = get_user_model()
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
+    confirmed_password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        if data['password'] != data['confirm_password']:
+        if data['password'] != data['confirmed_password']:
             raise serializers.ValidationError("Passwords do not match")
         return data
 
