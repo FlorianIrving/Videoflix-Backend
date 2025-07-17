@@ -33,7 +33,7 @@ class VideoListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Video
-        fields = ['id', 'title', 'category', 'thumbnail_url', 'created_at']
+        fields = ['id', 'title', 'category','description', 'thumbnail_url', 'created_at']
 
     def get_thumbnail_url(self, obj):
         request = self.context.get('request')
