@@ -1,6 +1,6 @@
 from rest_framework.generics import RetrieveAPIView
 from video_app.models import Video
-from .serializers import VideoSerializer
+from .serializers import VideoSerializer, VideoListSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,13 +11,11 @@ from django.conf import settings
 import os
 
 
-
 class VideoDashboardView(APIView):
     def get(self, request):
         videos = Video.objects.all().order_by('-created_at')
-        serializer = VideoSerializer(videos, many=True, context={'request': request})
+        serializer = VideoListSerializer(videos, many=True, context={'request': request})
         return Response(serializer.data)
-
 
 class VideoDetailView(RetrieveAPIView):
     queryset = Video.objects.all()

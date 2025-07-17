@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 # Create your models here.
 class Video(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, default="no description")
     genre = models.CharField(max_length=100)
     video = models.FileField(upload_to='videos/originals/', blank=False)
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
