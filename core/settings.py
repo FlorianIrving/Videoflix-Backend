@@ -228,3 +228,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # Site ID for Django Sites framework
 SITE_ID = 1
+
+# Frontend base URL for email activation links
+# This should match the URL where your frontend is hosted
+FRONTEND_BASE_URL = "http://localhost:5500"

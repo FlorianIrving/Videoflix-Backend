@@ -14,6 +14,8 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from django.contrib.auth import get_user_model
 
@@ -73,7 +75,7 @@ class LoginView(APIView):
             return response
 
         return Response(
-            {"detail": "E-Mail oder Passwort falsch."},
+            {"detail": "Invalid credentials."},
             status=status.HTTP_401_UNAUTHORIZED
         )
 
@@ -131,7 +133,7 @@ class RequestPasswordResetView(APIView):
             token_generator = PasswordResetTokenGenerator()
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
-            reset_url = f"http://127.0.0.1:8000/password_confirm/{uidb64}/{token}/"
+            reset_url = f"{settings.FRONTEND_BASE_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}"
             send_mail(
                 subject="Password Reset Request",
                 message=f"Here is your password reset link: {reset_url}",
@@ -143,17 +145,24 @@ class RequestPasswordResetView(APIView):
 
 class PasswordResetConfirmView(APIView):
     def post(self, request, uidb64, token):
-        password = request.data.get('password')
+        token = token.rstrip('/')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+        if not new_password or not confirm_password:
+            return Response({"error": "Both password fields are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if new_password != confirm_password:
+            return Response({"error": "Passwords do not match"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-
-        token_generator = PasswordResetTokenGenerator()
-        if user and token_generator.check_token(user, token):
-            user.set_password(password)
-            user.save()
-            return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
-        else:
+            return Response({"error": "Invalid link or user"}, status=status.HTTP_400_BAD_REQUEST)
+        if not PasswordResetTokenGenerator().check_token(user, token):
             return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_password(new_password, user=user)
+        except ValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)

@@ -8,6 +8,7 @@ from django.conf import settings
 # import jwt
 # from datetime import datetime, timedelta
 
+
 def send_activation_email(user, request):
     """
     Generiert Aktivierungslink & verschickt Aktivierungs-E-Mail.
@@ -15,9 +16,7 @@ def send_activation_email(user, request):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
 
-    activation_link = request.build_absolute_uri(
-        reverse('activate', kwargs={'uidb64': uid, 'token': token})
-    )
+    activation_link = f"{settings.FRONTEND_BASE_URL}/pages/auth/activate.html?uid={uid}&token={token}"
 
     subject = "Activate your account"
     message = f"""
