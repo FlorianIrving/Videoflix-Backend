@@ -5,6 +5,9 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+# Tests that a user can register successfully.
+# Creates a user and then tests that a POST to the registration endpoint
+# returns a 201 status code and creates a user with the provided email and password
 @pytest.mark.django_db
 def test_registration_success():
     client = APIClient()

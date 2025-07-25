@@ -8,10 +8,11 @@ from django.conf import settings
 # import jwt
 # from datetime import datetime, timedelta
 
-
+# Sends activation email with uid and token as query params
+# Triggered after registration
 def send_activation_email(user, request):
     """
-    Generiert Aktivierungslink & verschickt Aktivierungs-E-Mail.
+    Generates activation link & sends activation email.
     """
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))

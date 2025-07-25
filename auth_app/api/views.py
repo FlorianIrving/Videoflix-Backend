@@ -22,6 +22,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+# RegisterView
+# - Handles user registration
+# - Sends activation email after successful registration
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
@@ -37,7 +40,9 @@ class RegisterView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
-
+# LoginView
+# - Authenticates user by email and password
+# - Sets JWT tokens as HTTP-only cookies on success
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -79,7 +84,9 @@ class LoginView(APIView):
             status=status.HTTP_401_UNAUTHORIZED
         )
 
-
+# LogoutView
+# - Invalidates the refresh token
+# - Deletes access/refresh cookies
 class LogoutView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
@@ -107,7 +114,9 @@ class LogoutView(APIView):
         response.delete_cookie("refresh_token")
         return response
 
-
+# ActivateView
+# - Activates user account via uidb64 and token
+# - Triggered by email confirmation link
 class ActivateView(APIView):
     def get(self, request, uidb64, token):
         try:
@@ -124,7 +133,9 @@ class ActivateView(APIView):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return Response({"error": "Invalid activation link."}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# RequestPasswordResetView
+# - Sends password reset email if user with given email exists
+# - Link contains uidb64 and token as query params
 class RequestPasswordResetView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -137,12 +148,14 @@ class RequestPasswordResetView(APIView):
             send_mail(
                 subject="Password Reset Request",
                 message=f"Here is your password reset link: {reset_url}",
-                from_email="noreply@example.com",
+                from_email="noreply@videoflix.de",
                 recipient_list=[email],
             )
         return Response({"message": "If an account exists, an email has been sent."}, status=status.HTTP_200_OK)
 
-
+# PasswordResetConfirmView
+# - Validates token and uidb64 from reset link
+# - Sets new password if valid and confirmed
 class PasswordResetConfirmView(APIView):
     def post(self, request, uidb64, token):
         token = token.rstrip('/')

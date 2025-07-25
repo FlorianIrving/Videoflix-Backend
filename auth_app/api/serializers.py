@@ -4,7 +4,9 @@ from django.contrib.auth import get_user_model
 
 CustomUser = get_user_model()
 
-
+# Serializer for user registration
+# - validates matching passwords
+# - creates user with email and password
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -22,7 +24,9 @@ class RegisterSerializer(serializers.Serializer):
         )
         return user
 
-
+# Serializer for user login
+# - authenticates via email and password
+# - blocks login for inactive accounts
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
