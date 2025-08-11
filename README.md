@@ -1,4 +1,4 @@
-# 🎬 VIDEFLIX – Dein persönliches Streaming-Backend
+# 🎬 VIDEOFLIX – Dein persönliches Streaming-Backend
 
 ✨ **Modulares Django REST Backend** für eine Streaming-Plattform mit Fokus auf Performance, Sicherheit & Clean Code.
 
@@ -119,28 +119,9 @@ videoflix_backend/
 
 ---
 
-## 📄 Noch geplant / Optional
-
-- [ ] Redis Integration für Cache & E-Mail Throttling
-- [ ] Background Tasks (z. B. HLS-Konvertierung via Django RQ)
-- [ ] Fortschritts-Funktion (z. B. Resume via progress_app)
-- [ ] Deployment auf Server / Docker-Setup
-
----
-
 ## 📚 Dokumentation
 
 - Siehe [📁 `docs/`](./docs/) Verzeichnis (wird bei Abgabe ergänzt)
 - Enthält Diagramme, Abläufe, API-Docs, Testfälle
 
 ---
-
-## ✅ Definition of Done (Checkliste)
-
-- [x] Clean Code (max 14 Zeilen/Funktion, snake_case, keine Toten Variablen)
-- [x] E-Mail-Aktivierung & Passwort Reset
-- [x] Login via JWT mit Refresh
-- [x] Frontend via REST-API angebunden
-- [x] README + Doku vorhanden
-- [x] Tests vorhanden
-- [x] PEP-8 konform
