@@ -24,3 +24,5 @@ rq==2.4.0
 sqlparse==0.5.3
 tzdata==2025.2
 whitenoise==6.9.0
+mariadb>=1.1.7
+mysqlclient>=2.2.0
